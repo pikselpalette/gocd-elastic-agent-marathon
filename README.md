@@ -1,3 +1,5 @@
+# gocd-elastic-agent-marathon [![Build Status](https://travis-ci.org/pikselpalette/gocd-elastic-agent-marathon.png)](https://travis-ci.org/pikselpalette/gocd-elastic-agent-marathon)
+
 ## Building the code base
 
 To build the jar, run `./gradlew clean build jacocoTestReport
