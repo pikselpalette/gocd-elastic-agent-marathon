@@ -46,11 +46,12 @@ public class MarathonClient {
 		Builder b = Feign.builder()
 				.encoder(new GsonEncoder(ModelUtils.GSON))
 				.decoder(new GsonDecoder(ModelUtils.GSON))
-				.errorDecoder(new MarathonErrorDecoder())
-				.requestInterceptor(new MarathonHeadersInterceptor());
+				.errorDecoder(new MarathonErrorDecoder());
 
 		if (interceptors!=null)
 			b.requestInterceptors(asList(interceptors));
+
+		b.requestInterceptor(new MarathonHeadersInterceptor());
 
 		return b.target(Marathon.class, endpoint);
 	}
@@ -59,6 +60,6 @@ public class MarathonClient {
 	 * Creates a Marathon client proxy that performs HTTP basic authentication.
 	 */
 	public static Marathon getInstanceWithBasicAuth(String endpoint, String username, String password) {
-		return getInstance(endpoint,new BasicAuthRequestInterceptor(username,password));
+		return getInstance(endpoint, new BasicAuthRequestInterceptor(username,password));
 	}
 }

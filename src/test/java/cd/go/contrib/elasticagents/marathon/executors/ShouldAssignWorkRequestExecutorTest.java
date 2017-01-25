@@ -45,7 +45,7 @@ public class ShouldAssignWorkRequestExecutorTest extends BaseTest {
         marathonClientFactory mf = mock(marathonClientFactory.class);
         when(mf.marathon(any(PluginSettings.class))).thenReturn(createClient());
         agentInstances = new MarathonAgentInstances(mf);
-        properties.put("Memory", "2048");
+        properties.put("Memory", "2048MB");
         properties.put("CPUs", "2");
         properties.put("Command", "");
         properties.put("Environment", "production");

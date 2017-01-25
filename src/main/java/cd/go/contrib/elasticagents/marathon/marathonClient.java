@@ -27,63 +27,13 @@ import static cd.go.contrib.elasticagents.marathon.MarathonPlugin.LOG;
 public class marathonClient {
 
     private static Marathon marathon;
-    private PluginSettings settings;
     private String prefix;
     private String marathonUrl;
-    private String goServerUrl;
-    private Integer maxInstances = 10;
 
     public marathonClient () {}
 
     public marathonClient (PluginSettings settings) {
-        this.settings = settings;
-        refreshSettings();
-    }
-
-    @SuppressWarnings("unused")
-    public String getPrefix() {
-        return prefix;
-    }
-
-    @SuppressWarnings("unused")
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-
-    @SuppressWarnings("unused")
-    public Integer getMaxInstances() {
-        return maxInstances;
-    }
-
-    @SuppressWarnings("unused")
-    public void setMaxInstances(Integer maxInstances) {
-        this.maxInstances = maxInstances;
-    }
-
-    @SuppressWarnings("unused")
-    public String getGoServerUrl() {
-        return goServerUrl;
-    }
-
-    @SuppressWarnings("unused")
-    public void setGoServerUrl(String goServerUrl) {
-        this.goServerUrl = goServerUrl;
-    }
-
-    @SuppressWarnings("unused")
-    public String getMarathonUrl() {
-        return marathonUrl;
-    }
-
-    @SuppressWarnings("unused")
-    public void setMarathonUrl(String marathonUrl) {
-        this.marathonUrl = marathonUrl;
-    }
-
-    private void refreshSettings() {
-        setGoServerUrl(settings.getGoServerUrl());
         setMarathonUrl(settings.getMarathonUrl());
-        setMaxInstances(settings.getMaxInstances());
         setPrefix(settings.getMarathonPrefix());
 
         if (marathon == null) {
@@ -99,6 +49,26 @@ public class marathonClient {
         }
     }
 
+    @SuppressWarnings("unused")
+    public String getPrefix() {
+        return prefix;
+    }
+
+    @SuppressWarnings("unused")
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    @SuppressWarnings("unused")
+    public String getMarathonUrl() {
+        return marathonUrl;
+    }
+
+    @SuppressWarnings("unused")
+    public void setMarathonUrl(String marathonUrl) {
+        this.marathonUrl = marathonUrl;
+    }
+
     public void terminate(String name) {
         try {
             marathon.deleteApp(name);
@@ -107,15 +77,15 @@ public class marathonClient {
         }
     }
 
-    public List<MarathonInstance> getGoAgents() {
+    public List<MarathonInstance> getGoAgents(PluginSettings settings) {
         List<MarathonInstance> appList = new ArrayList<>();
         try {
             for (App app: marathon.getGroup(getPrefix()).getApps()) {
                 app.setTasks(marathon.getAppTasks(app.getId()).getTasks());
                 try {
-                    appList.add(InstanceBuilder.instanceFromApp(app));
+                    appList.add(MarathonInstance.instanceFromApp(app, settings));
                 } catch (Exception f) {
-                    LOG.error("InstanceBuilder failed: " + f.toString(), f);
+                    LOG.error("instanceFromApp failed: " + f.toString(), f);
                 }
             }
         } catch (Exception e) {
@@ -124,33 +94,21 @@ public class marathonClient {
         return appList;
     }
 
-    public MarathonInstance findGoAgent(String agentId) {
-        App existing;
-        String appId = getPrefix() + agentId;
-        try {
-            existing = marathon.getApp(appId).getApp();
-            existing.setTasks(marathon.getAppTasks(appId).getTasks());
-        } catch (Exception e) {
-            return null;
-        }
-
-        return InstanceBuilder.instanceFromApp(existing);
-    }
-
     public MarathonInstance requestGoAgent(MarathonInstance instance) {
 
-        App app = InstanceBuilder.appFromInstance(instance);
+        App app = instance.getApp();
 
         App existing = null;
         try {
             existing = marathon.getApp(app.getId()).getApp();
-            existing.setTasks(marathon.getAppTasks(app.getId()).getTasks());
         } catch (Exception first) {
             LOG.debug("No app exists for " + app.getId() + ", creating");
         }
-        if (app != null) {
+
+        if (existing != null) {
             if (app.equals(existing)) {
                 LOG.info("App already exists: " + existing);
+                app.setTasks(marathon.getAppTasks(app.getId()).getTasks());
                 return instance;
             }
 

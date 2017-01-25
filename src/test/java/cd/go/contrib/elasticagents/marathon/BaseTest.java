@@ -61,7 +61,7 @@ public abstract class BaseTest {
         }
 
         @Override
-        public List<MarathonInstance> getGoAgents() {
+        public List<MarathonInstance> getGoAgents(PluginSettings settings) {
             List<MarathonInstance> appList = new ArrayList<>();
             appList.addAll(instances.values());
             return appList;
@@ -71,11 +71,5 @@ public abstract class BaseTest {
         public void terminate(String name) {
             instances.remove(name);
         }
-
-        @Override
-        public MarathonInstance findGoAgent(String agentId) {
-            return instances.get(agentId);
-        }
-
     }
 }

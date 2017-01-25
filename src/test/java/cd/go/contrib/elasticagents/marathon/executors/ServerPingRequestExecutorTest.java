@@ -90,7 +90,7 @@ public class ServerPingRequestExecutorTest extends BaseTest {
         agentInstances.clock = new Clock.TestClock().forward(Period.minutes(11));
         Map<String, String> properties = new HashMap<>();
         properties.put("CPUs", "2.0");
-        properties.put("Memory", "2048");
+        properties.put("Memory", "2048MB");
         properties.put("Command", "");
         properties.put("Environment", "Production");
         properties.put("Image", "goagent");

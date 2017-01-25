@@ -34,9 +34,9 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
     private boolean refreshed;
     private DateTime refreshedTime;
     public Clock clock = Clock.DEFAULT;
-    final Semaphore semaphore = new Semaphore(0, true);
+    private final Semaphore semaphore = new Semaphore(0, true);
 
-    public MarathonAgentInstances() {
+    private MarathonAgentInstances() {
         this.marathonClientFactory = new marathonClientFactory();
     }
 
@@ -74,18 +74,13 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
     public void terminate(String agentId, PluginSettings settings) throws Exception {
         MarathonInstance instance = instances.get(agentId);
         if (instance != null) {
-            instance.terminate(marathon(settings), settings.getMarathonPrefix());
+            instance.terminate(marathon(settings));
         } else {
             LOG.warn("Requested to terminate an instance that does not exist " + agentId);
             marathon(settings).terminate(agentId);
         }
 
-        doWithLockOnSemaphore(new Runnable() {
-            @Override
-            public void run() {
-                semaphore.release();
-            }
-        });
+        doWithLockOnSemaphore(() -> semaphore.release());
 
         synchronized (instances) {
             instances.remove(agentId);
@@ -106,7 +101,6 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
     }
 
     @Override
-    // TODO: Implement me!
     public Agents instancesCreatedAfterTimeout(PluginSettings settings, Agents agents) {
         ArrayList<Agent> oldAgents = new ArrayList<>();
         for (Agent agent : agents.agents()) {
@@ -126,20 +120,22 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
     public void refreshAll(PluginRequest pluginRequest) throws Exception {
         if (refreshed) {
             if (refreshedTime == null) {
-                refreshed = false;
+                setRefreshed(false);
             } else {
                 if (refreshedTime.isBefore(new DateTime().minus(new Period("PT10M")))) {
-                    refreshedTime = new DateTime();
-                    refreshed = false;
+                    setRefreshed(false);
                 }
             }
         }
         if (!refreshed) {
-            List<MarathonInstance> marathonInstanceList = marathon(pluginRequest.getPluginSettings()).getGoAgents();
+            PluginSettings settings = pluginRequest.getPluginSettings();
+            List<MarathonInstance> marathonInstanceList = marathon(settings).getGoAgents(settings);
             for (MarathonInstance instance: marathonInstanceList) {
                  register(instance);
             }
-            refreshed = true;
+            LOG.debug("Instances found: " + marathonInstanceList.toString());
+            setRefreshedTime(new DateTime());
+            setRefreshed(true);
         }
     }
 
@@ -164,13 +160,8 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
         }
         Period period = settings.getAutoRegisterPeriod();
 
-        for (String instanceName : instances.keySet()) {
-            if (knownAgents.containsAgentWithId(instanceName)) {
-                continue;
-            }
-
-            MarathonInstance instance = marathon(settings).findGoAgent(instanceName);
-            if (instance == null) {
+        for (MarathonInstance instance: instances.values()) {
+            if (knownAgents.containsAgentWithId(instance.name())) {
                 continue;
             }
 
@@ -181,5 +172,13 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
             }
         }
         return unregisteredContainers;
+    }
+
+    private void setRefreshedTime(DateTime refreshedTime) {
+        this.refreshedTime = refreshedTime;
+    }
+
+    private void setRefreshed(boolean refreshed) {
+        this.refreshed= refreshed;
     }
 }
