@@ -34,12 +34,17 @@
   </div>
   <div class="columns medium-4 large-3 end">
     <label ng-class="{'is-invalid-label': GOINPUTNAME[Command].$error.server}">Command:</label>
-    <input ng-class="{'is-invalid-input': GOINPUTNAME[Command].$error.server}" type="text" ng-model="Command" ng-required="true" rows="7" placeholder="2"/>
+    <input ng-class="{'is-invalid-input': GOINPUTNAME[Command].$error.server}" type="text" ng-model="Command" ng-required="false" rows="7"/>
     <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[Command].$error.server}" ng-show="GOINPUTNAME[Command].$error.server">{{GOINPUTNAME[Command].$error.server}}</span>
   </div>
   <div class="columns medium-4 large-3 end">
+    <label ng-class="{'is-invalid-label': GOINPUTNAME[User].$error.server}">User:</label>
+    <input ng-class="{'is-invalid-input': GOINPUTNAME[User].$error.server}" type="text" ng-model="User" ng-required="false" rows="7"/>
+    <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[User].$error.server}" ng-show="GOINPUTNAME[User].$error.server">{{GOINPUTNAME[User].$error.server}}</span>
+  </div>
+  <div class="columns medium-4 large-3 end">
     <label ng-class="{'is-invalid-label': GOINPUTNAME[Environment].$error.server}">Environment:</label>
-    <input ng-class="{'is-invalid-input': GOINPUTNAME[Environment].$error.server}" type="text" ng-model="Environment" ng-required="true" rows="7"/>
+    <input ng-class="{'is-invalid-input': GOINPUTNAME[Environment].$error.server}" type="text" ng-model="Environment" ng-required="false" rows="7"/>
     <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[Environment].$error.server}" ng-show="GOINPUTNAME[Environment].$error.server">{{GOINPUTNAME[Environment].$error.server}}</span>
   </div>
 </div>

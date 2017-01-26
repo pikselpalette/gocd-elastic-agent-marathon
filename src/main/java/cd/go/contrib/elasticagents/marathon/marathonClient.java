@@ -16,6 +16,7 @@
 
 package cd.go.contrib.elasticagents.marathon;
 
+import cd.go.contrib.elasticagents.marathon.marathon.MarathonApp;
 import cd.go.contrib.elasticagents.marathon.marathon.MarathonClient;
 import mesosphere.marathon.client.Marathon;
 import mesosphere.marathon.client.model.v2.App;
@@ -83,7 +84,7 @@ public class marathonClient {
             for (App app: marathon.getGroup(getPrefix()).getApps()) {
                 app.setTasks(marathon.getAppTasks(app.getId()).getTasks());
                 try {
-                    appList.add(MarathonInstance.instanceFromApp(app, settings));
+                    appList.add(MarathonInstance.instanceFromApp((MarathonApp)app, settings));
                 } catch (Exception f) {
                     LOG.error("instanceFromApp failed: " + f.toString(), f);
                 }
@@ -96,11 +97,11 @@ public class marathonClient {
 
     public MarathonInstance requestGoAgent(MarathonInstance instance) {
 
-        App app = instance.getApp();
+        MarathonApp app = instance.getApp();
 
-        App existing = null;
+        MarathonApp existing = null;
         try {
-            existing = marathon.getApp(app.getId()).getApp();
+            existing = (MarathonApp)marathon.getApp(app.getId()).getApp();
         } catch (Exception first) {
             LOG.debug("No app exists for " + app.getId() + ", creating");
         }

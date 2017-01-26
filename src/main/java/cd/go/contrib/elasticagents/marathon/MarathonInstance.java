@@ -16,10 +16,10 @@
 
 package cd.go.contrib.elasticagents.marathon;
 
+import cd.go.contrib.elasticagents.marathon.marathon.MarathonApp;
 import cd.go.contrib.elasticagents.marathon.requests.CreateAgentRequest;
 import cd.go.contrib.elasticagents.marathon.utils.Size;
 import com.google.common.collect.Iterables;
-import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -41,10 +41,11 @@ public class MarathonInstance {
     private final Double memory;
     private final Double cpus;
     private final String command;
+    private final String user;
     private final Map<String,String> autoRegisterProperties;
-    private final App app;
+    private final MarathonApp app;
 
-    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, Map<String, String> autoRegisterProperties) {
+    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, Map<String, String> autoRegisterProperties) {
         this.name = name;
         this.createdAt = createdAt;
         this.environment = environment;
@@ -54,11 +55,12 @@ public class MarathonInstance {
         this.memory = memory;
         this.cpus = cpus;
         this.command = command;
+        this.user = user;
         this.autoRegisterProperties = autoRegisterProperties;
         this.app = buildApp();
     }
 
-    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, Map<String, String> autoRegisterProperties, App app) {
+    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, Map<String, String> autoRegisterProperties, MarathonApp app) {
         this.name = name;
         this.createdAt = createdAt;
         this.environment = environment;
@@ -68,11 +70,12 @@ public class MarathonInstance {
         this.memory = memory;
         this.cpus = cpus;
         this.command = command;
+        this.user = user;
         this.autoRegisterProperties = autoRegisterProperties;
         this.app = app;
     }
 
-    private App buildApp() {
+    private MarathonApp buildApp() {
         Docker docker = new Docker();
         docker.setImage(getImage());
         docker.setNetwork("HOST");
@@ -81,7 +84,7 @@ public class MarathonInstance {
         container.setType("DOCKER");
         container.setDocker(docker);
 
-        App app = new App();
+        MarathonApp app = new MarathonApp();
         app.setMem(getMemory());
         app.setCpus(getCpus());
         app.setId(getMarathonPrefix() + getName());
@@ -98,10 +101,14 @@ public class MarathonInstance {
 
         app.setEnv(envVars);
 
+        if (getUser() != null) {
+            app.setUser(getUser());
+        }
+
         return app;
     }
 
-    public static MarathonInstance instanceFromApp(App app, PluginSettings settings) {
+    public static MarathonInstance instanceFromApp(MarathonApp app, PluginSettings settings) {
         Map<String, String> autoRegisterProperties = new HashMap<>();
         autoRegisterProperties.put("GO_EA_AUTO_REGISTER_KEY", app.getEnv().get("GO_EA_AUTO_REGISTER_KEY"));
         autoRegisterProperties.put("GO_EA_AUTO_REGISTER_ENVIRONMENT", app.getEnv().get("GO_EA_AUTO_REGISTER_ENVIRONMENT"));
@@ -126,6 +133,7 @@ public class MarathonInstance {
                 app.getMem(),
                 app.getCpus(),
                 app.getCmd(),
+                app.getUser(),
                 autoRegisterProperties,
                 app
         );
@@ -148,6 +156,7 @@ public class MarathonInstance {
                 Double.valueOf(Size.parse(request.properties().get("Memory")).toMegabytes()),
                 Double.valueOf(request.properties().get("CPUs")),
                 request.properties().get("Command"),
+                request.properties().get("User"),
                 request.autoregisterPropertiesAsEnvironmentVars(name)
         );
 
@@ -168,6 +177,7 @@ public class MarathonInstance {
                 ", memory=" + memory +
                 ", cpus=" + cpus +
                 ", command='" + command + '\'' +
+                ", user='" + user + '\'' +
                 ", autoRegisterProperties=" + autoRegisterProperties +
                 ", app=" + app +
                 '}';
@@ -191,6 +201,7 @@ public class MarathonInstance {
                 .append(getMemory(), that.getMemory())
                 .append(getCpus(), that.getCpus())
                 .append(getCommand(), that.getCommand())
+                .append(getUser(), that.getUser())
                 .append(getAutoRegisterProperties(), that.getAutoRegisterProperties())
                 .append(getApp(), that.getApp())
                 .isEquals();
@@ -208,6 +219,7 @@ public class MarathonInstance {
                 .append(getMemory())
                 .append(getCpus())
                 .append(getCommand())
+                .append(getUser())
                 .append(getAutoRegisterProperties())
                 .append(getApp())
                 .toHashCode();
@@ -271,11 +283,15 @@ public class MarathonInstance {
         return command;
     }
 
+    public String getUser() {
+        return user;
+    }
+
     public Map<String, String> getAutoRegisterProperties() {
         return autoRegisterProperties;
     }
 
-    public App getApp() {
+    public MarathonApp getApp() {
         return app;
     }
 }

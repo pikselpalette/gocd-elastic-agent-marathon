@@ -66,12 +66,19 @@ public class GetProfileMetadataExecutorTest {
                 "  {\n" +
                 "    \"key\": \"Command\",\n" +
                 "    \"metadata\": {\n" +
-                "      \"required\": true,\n" +
+                "      \"required\": false,\n" +
                 "      \"secure\": false\n" +
                 "    }\n" +
                 "  },\n" +
                 "  {\n" +
                 "    \"key\": \"Environment\",\n" +
+                "    \"metadata\": {\n" +
+                "      \"required\": false,\n" +
+                "      \"secure\": false\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"key\": \"User\",\n" +
                 "    \"metadata\": {\n" +
                 "      \"required\": false,\n" +
                 "      \"secure\": false\n" +

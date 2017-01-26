@@ -28,13 +28,13 @@ public class ProfileValidateRequestExecutorTest {
     public void shouldBarfWhenUnknownKeysArePassed() throws Exception {
         ProfileValidateRequestExecutor executor = new ProfileValidateRequestExecutor(new ProfileValidateRequest(Collections.singletonMap("foo", "bar")));
         String json = executor.execute().responseBody();
-        JSONAssert.assertEquals("[{\"message\":\"Image must not be blank.\",\"key\":\"Image\"},{\"message\":\"Memory must not be blank.\",\"key\":\"Memory\"},{\"message\":\"CPUs must not be blank.\",\"key\":\"CPUs\"},{\"message\":\"Command must not be blank.\",\"key\":\"Command\"},{\"key\":\"foo\",\"message\":\"Is an unknown property\"}]", json, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals("[{\"message\":\"Image must not be blank.\",\"key\":\"Image\"},{\"message\":\"Memory must not be blank.\",\"key\":\"Memory\"},{\"message\":\"CPUs must not be blank.\",\"key\":\"CPUs\"},{\"key\":\"foo\",\"message\":\"Is an unknown property\"}]", json, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
     public void shouldValidateMandatoryKeys() throws Exception {
         ProfileValidateRequestExecutor executor = new ProfileValidateRequestExecutor(new ProfileValidateRequest(Collections.<String, String>emptyMap()));
         String json = executor.execute().responseBody();
-        JSONAssert.assertEquals("[{\"message\":\"Image must not be blank.\",\"key\":\"Image\"},{\"message\":\"Memory must not be blank.\",\"key\":\"Memory\"},{\"message\":\"CPUs must not be blank.\",\"key\":\"CPUs\"},{\"message\":\"Command must not be blank.\",\"key\":\"Command\"}]", json, JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals("[{\"message\":\"Image must not be blank.\",\"key\":\"Image\"},{\"message\":\"Memory must not be blank.\",\"key\":\"Memory\"},{\"message\":\"CPUs must not be blank.\",\"key\":\"CPUs\"}]", json, JSONCompareMode.NON_EXTENSIBLE);
     }
 }
