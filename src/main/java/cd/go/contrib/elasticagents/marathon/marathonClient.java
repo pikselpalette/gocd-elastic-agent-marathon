@@ -84,7 +84,7 @@ public class marathonClient {
             for (App app: marathon.getGroup(getPrefix()).getApps()) {
                 app.setTasks(marathon.getAppTasks(app.getId()).getTasks());
                 try {
-                    appList.add(MarathonInstance.instanceFromApp((MarathonApp)app, settings));
+                    appList.add(MarathonInstance.instanceFromApp(app, settings));
                 } catch (Exception f) {
                     LOG.error("instanceFromApp failed: " + f.toString(), f);
                 }

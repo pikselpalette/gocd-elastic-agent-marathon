@@ -20,6 +20,7 @@ import cd.go.contrib.elasticagents.marathon.marathon.MarathonApp;
 import cd.go.contrib.elasticagents.marathon.requests.CreateAgentRequest;
 import cd.go.contrib.elasticagents.marathon.utils.Size;
 import com.google.common.collect.Iterables;
+import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
 import mesosphere.marathon.client.model.v2.Docker;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -60,21 +61,6 @@ public class MarathonInstance {
         this.app = buildApp();
     }
 
-    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, Map<String, String> autoRegisterProperties, MarathonApp app) {
-        this.name = name;
-        this.createdAt = createdAt;
-        this.environment = environment;
-        this.goServerUrl = goServerUrl;
-        this.marathonPrefix = marathonPrefix;
-        this.image = image;
-        this.memory = memory;
-        this.cpus = cpus;
-        this.command = command;
-        this.user = user;
-        this.autoRegisterProperties = autoRegisterProperties;
-        this.app = app;
-    }
-
     private MarathonApp buildApp() {
         Docker docker = new Docker();
         docker.setImage(getImage());
@@ -103,12 +89,13 @@ public class MarathonInstance {
 
         if (getUser() != null) {
             app.setUser(getUser());
+            envVars.put("GO_EA_USER", getUser());
         }
 
         return app;
     }
 
-    public static MarathonInstance instanceFromApp(MarathonApp app, PluginSettings settings) {
+    public static MarathonInstance instanceFromApp(App app, PluginSettings settings) {
         Map<String, String> autoRegisterProperties = new HashMap<>();
         autoRegisterProperties.put("GO_EA_AUTO_REGISTER_KEY", app.getEnv().get("GO_EA_AUTO_REGISTER_KEY"));
         autoRegisterProperties.put("GO_EA_AUTO_REGISTER_ENVIRONMENT", app.getEnv().get("GO_EA_AUTO_REGISTER_ENVIRONMENT"));
@@ -133,9 +120,8 @@ public class MarathonInstance {
                 app.getMem(),
                 app.getCpus(),
                 app.getCmd(),
-                app.getUser(),
-                autoRegisterProperties,
-                app
+                app.getEnv().get("GO_EA_USER"),
+                autoRegisterProperties
         );
     }
 
