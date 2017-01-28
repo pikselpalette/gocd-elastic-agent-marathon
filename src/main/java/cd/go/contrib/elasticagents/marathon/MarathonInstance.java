@@ -17,12 +17,12 @@
 package cd.go.contrib.elasticagents.marathon;
 
 import cd.go.contrib.elasticagents.marathon.marathon.MarathonApp;
+import cd.go.contrib.elasticagents.marathon.marathon.MarathonDocker;
 import cd.go.contrib.elasticagents.marathon.requests.CreateAgentRequest;
 import cd.go.contrib.elasticagents.marathon.utils.Size;
 import com.google.common.collect.Iterables;
 import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
-import mesosphere.marathon.client.model.v2.Docker;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
@@ -62,9 +62,12 @@ public class MarathonInstance {
     }
 
     private MarathonApp buildApp() {
-        Docker docker = new Docker();
+        MarathonDocker docker = new MarathonDocker();
         docker.setImage(getImage());
         docker.setNetwork("HOST");
+        docker.setPrivileged(true);
+        docker.setForcePullImage(false);
+        docker.setPortMappings(new ArrayList<>());
 
         Container container = new Container();
         container.setType("DOCKER");
