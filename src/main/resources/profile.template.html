@@ -47,4 +47,13 @@
     <input ng-class="{'is-invalid-input': GOINPUTNAME[Environment].$error.server}" type="text" ng-model="Environment" ng-required="false" rows="7"/>
     <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[Environment].$error.server}" ng-show="GOINPUTNAME[Environment].$error.server">{{GOINPUTNAME[Environment].$error.server}}</span>
   </div>
+  <div class="row">
+    <div class="columns end">
+      <label ng-class="{'is-invalid-label': GOINPUTNAME[Constraints].$error.server}">Constraints
+        <small>(Enter one constraint per line)</small>
+      </label>
+      <textarea ng-class="{'is-invalid-input': GOINPUTNAME[Constraints].$error.server}" type="text" ng-model="Constraints" ng-required="true" rows="7" placeholder="[&quot;hostname&quot;, &quot;UNIQUE&quot;]&#x000A;[&quot;rack_id&quot;, &quot;CLUSTER&quot;, &quot;rack-1&quot;]"></textarea>
+      <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[Constraints].$error.server}" ng-show="GOINPUTNAME[Constraints].$error.server">{{GOINPUTNAME[Constraints].$error.server}}</span>
+    </div>
+  </div>
 </div>

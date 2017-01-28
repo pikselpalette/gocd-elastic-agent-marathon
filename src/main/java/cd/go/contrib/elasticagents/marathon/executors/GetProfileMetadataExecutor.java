@@ -34,6 +34,7 @@ public class GetProfileMetadataExecutor implements RequestExecutor {
     private static final Metadata COMMAND = new Metadata("Command", false, false);
     private static final Metadata ENVIRONMENT = new Metadata("Environment", false, false);
     private static final Metadata USER = new Metadata("User", false, false);
+    private static final Metadata CONSTRAINTS = new Metadata("Constraints", false, false);
 
     static final List<Metadata> FIELDS = new ArrayList<>();
 
@@ -44,6 +45,7 @@ public class GetProfileMetadataExecutor implements RequestExecutor {
         FIELDS.add(COMMAND);
         FIELDS.add(ENVIRONMENT);
         FIELDS.add(USER);
+        FIELDS.add(CONSTRAINTS);
     }
 
     @Override

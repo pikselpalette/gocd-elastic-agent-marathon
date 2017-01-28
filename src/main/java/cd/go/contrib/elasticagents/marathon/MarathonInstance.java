@@ -21,6 +21,7 @@ import cd.go.contrib.elasticagents.marathon.marathon.MarathonDocker;
 import cd.go.contrib.elasticagents.marathon.requests.CreateAgentRequest;
 import cd.go.contrib.elasticagents.marathon.utils.Size;
 import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
 import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -43,10 +44,11 @@ public class MarathonInstance {
     private final Double cpus;
     private final String command;
     private final String user;
+    private final String constraints;
     private final Map<String,String> autoRegisterProperties;
     private final MarathonApp app;
 
-    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, Map<String, String> autoRegisterProperties) {
+    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, String constraints, Map<String, String> autoRegisterProperties) {
         this.name = name;
         this.createdAt = createdAt;
         this.environment = environment;
@@ -57,8 +59,17 @@ public class MarathonInstance {
         this.cpus = cpus;
         this.command = command;
         this.user = user;
+        this.constraints = constraints;
         this.autoRegisterProperties = autoRegisterProperties;
         this.app = buildApp();
+    }
+
+    private boolean hasContent(String toCheck) {
+        if (toCheck == null) {
+            return false;
+        }
+
+        return (toCheck.length() != 0);
     }
 
     private MarathonApp buildApp() {
@@ -79,7 +90,20 @@ public class MarathonInstance {
         app.setId(getMarathonPrefix() + getName());
         app.setInstances(1);
         app.setContainer(container);
-        app.setCmd(getCommand());
+        app.setPorts(new ArrayList<>());
+
+        if (hasContent(getCommand())) {
+            app.setCmd(getCommand());
+        }
+
+        if (hasContent(getConstraints())) {
+            List<List<String>> constraints = new ArrayList<>();
+            Gson gson = new Gson();
+            for (String constraint: getConstraints().split("\n")) {
+                constraints.add(gson.fromJson(constraint, List.class));
+            }
+            app.setConstraints(constraints);
+        }
 
         Map<String, String> envVars = new HashMap<>();
 
@@ -90,7 +114,7 @@ public class MarathonInstance {
 
         app.setEnv(envVars);
 
-        if (getUser() != null) {
+        if (hasContent(getUser())) {
             app.setUser(getUser());
             envVars.put("GO_EA_USER", getUser());
         }
@@ -113,6 +137,14 @@ public class MarathonInstance {
             }
         }
 
+        Gson gson = new Gson();
+        List<String> constraintList = new ArrayList<>();
+
+        for (List<String> constraint: app.getConstraints()) {
+            constraintList.add(gson.toJson(constraint));
+        }
+        String constraints = String.join("\n", constraintList);
+
         return new MarathonInstance(
                 app.getId().substring(settings.getMarathonPrefix().length()),
                 createdTime,
@@ -124,6 +156,7 @@ public class MarathonInstance {
                 app.getCpus(),
                 app.getCmd(),
                 app.getEnv().get("GO_EA_USER"),
+                constraints,
                 autoRegisterProperties
         );
     }
@@ -146,6 +179,7 @@ public class MarathonInstance {
                 Double.valueOf(request.properties().get("CPUs")),
                 request.properties().get("Command"),
                 request.properties().get("User"),
+                request.properties().get("Constraints"),
                 request.autoregisterPropertiesAsEnvironmentVars(name)
         );
 
@@ -167,6 +201,7 @@ public class MarathonInstance {
                 ", cpus=" + cpus +
                 ", command='" + command + '\'' +
                 ", user='" + user + '\'' +
+                ", constraints='" + constraints + '\'' +
                 ", autoRegisterProperties=" + autoRegisterProperties +
                 ", app=" + app +
                 '}';
@@ -191,6 +226,7 @@ public class MarathonInstance {
                 .append(getCpus(), that.getCpus())
                 .append(getCommand(), that.getCommand())
                 .append(getUser(), that.getUser())
+                .append(getConstraints(), that.getConstraints())
                 .append(getAutoRegisterProperties(), that.getAutoRegisterProperties())
                 .append(getApp(), that.getApp())
                 .isEquals();
@@ -209,6 +245,7 @@ public class MarathonInstance {
                 .append(getCpus())
                 .append(getCommand())
                 .append(getUser())
+                .append(getConstraints())
                 .append(getAutoRegisterProperties())
                 .append(getApp())
                 .toHashCode();
@@ -220,6 +257,9 @@ public class MarathonInstance {
         props.put("CPUs", String.valueOf(getCpus()));
         props.put("Memory", String.valueOf(getMemory()));
         props.put("Image", getImage());
+        if (getConstraints() != null) {
+            props.put("Constraints", getConstraints());
+        }
 
         return props;
     }
@@ -274,6 +314,10 @@ public class MarathonInstance {
 
     public String getUser() {
         return user;
+    }
+
+    public String getConstraints() {
+        return constraints;
     }
 
     public Map<String, String> getAutoRegisterProperties() {

@@ -56,7 +56,8 @@ public class ShouldAssignWorkRequestExecutor implements RequestExecutor {
         return (
                 (Double.valueOf(request.getOrDefault("CPUs", "0")).equals(Double.valueOf(instance.getOrDefault("CPUs", "0")))) &&
                 (Double.valueOf(castToSize(request.getOrDefault("Memory", "0"))).equals(Double.valueOf(castToSize(instance.getOrDefault("Memory", "0"))))) &&
-                (request.getOrDefault("Image", "").equals(instance.getOrDefault("Image", "")))
+                (request.getOrDefault("Image", "").equals(instance.getOrDefault("Image", ""))) &&
+                (request.getOrDefault("Constraints", "").equals(instance.getOrDefault("Constraints", "")))
         );
 
     }
