@@ -34,7 +34,7 @@ public class GetProfileMetadataExecutor implements RequestExecutor {
     private static final Metadata COMMAND = new Metadata("Command", false, false);
     private static final Metadata ENVIRONMENT = new Metadata("Environment", false, false);
     private static final Metadata USER = new Metadata("User", false, false);
-    private static final Metadata CONSTRAINTS = new Metadata("Constraints", false, false);
+    private static final Metadata CONSTRAINTS = new ArrayMetadata("Constraints", false);
 
     static final List<Metadata> FIELDS = new ArrayList<>();
 
