@@ -184,8 +184,7 @@ public class MarathonInstance {
         );
 
         LOG.info("Creating instance " + marathonInstance.app.getId());
-        marathon.requestGoAgent(marathonInstance);
-        return marathonInstance;
+        return marathon.requestGoAgent(marathonInstance);
     }
 
     @Override

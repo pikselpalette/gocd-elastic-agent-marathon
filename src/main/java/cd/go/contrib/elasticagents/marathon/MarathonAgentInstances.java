@@ -61,7 +61,9 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
             doWithLockOnSemaphore(new SetupSemaphore(maxInstances, instances, semaphore));
             if (semaphore.tryAcquire()) {
                 MarathonInstance instance = MarathonInstance.create(request, settings, marathon(settings));
-                register(instance);
+                if (instance != null) {
+                    register(instance);
+                }
                 return instance;
             } else {
                 LOG.info("The number of containers currently running is currently at the maximum permissible limit (" + instances.size() + "). Not creating any more containers.");
