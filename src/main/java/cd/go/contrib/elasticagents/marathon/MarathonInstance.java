@@ -31,6 +31,7 @@ import org.joda.time.DateTime;
 import java.util.*;
 
 import static cd.go.contrib.elasticagents.marathon.MarathonPlugin.LOG;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class MarathonInstance {
     private String name;
@@ -64,14 +65,6 @@ public class MarathonInstance {
         this.app = buildApp();
     }
 
-    private boolean hasContent(String toCheck) {
-        if (toCheck == null) {
-            return false;
-        }
-
-        return (toCheck.length() != 0);
-    }
-
     private MarathonApp buildApp() {
         MarathonDocker docker = new MarathonDocker();
         docker.setImage(getImage());
@@ -92,11 +85,11 @@ public class MarathonInstance {
         app.setContainer(container);
         app.setPorts(new ArrayList<>());
 
-        if (hasContent(getCommand())) {
+        if (isNotBlank(getCommand())) {
             app.setCmd(getCommand());
         }
 
-        if (hasContent(getConstraints())) {
+        if (isNotBlank(getConstraints())) {
             List<List<String>> constraints = new ArrayList<>();
             Gson gson = new Gson();
             for (String constraint: getConstraints().split("\n")) {
@@ -114,7 +107,7 @@ public class MarathonInstance {
 
         app.setEnv(envVars);
 
-        if (hasContent(getUser())) {
+        if (isNotBlank(getUser())) {
             app.setUser(getUser());
             envVars.put("GO_EA_USER", getUser());
         }
