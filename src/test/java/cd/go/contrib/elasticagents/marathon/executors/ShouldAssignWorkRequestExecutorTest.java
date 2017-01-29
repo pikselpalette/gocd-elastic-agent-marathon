@@ -54,6 +54,14 @@ public class ShouldAssignWorkRequestExecutorTest extends BaseTest {
     }
 
     @Test
+    public void shouldNotAssignWorkToMissingContainer() throws Exception {
+        ShouldAssignWorkRequest request = new ShouldAssignWorkRequest(new Agent("differentName", null, null, null), environment, properties);
+        GoPluginApiResponse response = new ShouldAssignWorkRequestExecutor(request, agentInstances, null).execute();
+        assertThat(response.responseCode(), is(200));
+        assertThat(response.responseBody(), is("false"));
+    }
+
+    @Test
     public void shouldAssignWorkToContainerWithMatchingEnvironmentNameAndProperties() throws Exception {
         ShouldAssignWorkRequest request = new ShouldAssignWorkRequest(new Agent(instance.name(), null, null, null), environment, properties);
         GoPluginApiResponse response = new ShouldAssignWorkRequestExecutor(request, agentInstances, null).execute();
