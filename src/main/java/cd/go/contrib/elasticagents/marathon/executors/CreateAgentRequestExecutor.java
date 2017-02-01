@@ -16,12 +16,14 @@
 
 package cd.go.contrib.elasticagents.marathon.executors;
 
-import cd.go.contrib.elasticagents.marathon.AgentInstances;
-import cd.go.contrib.elasticagents.marathon.PluginRequest;
-import cd.go.contrib.elasticagents.marathon.RequestExecutor;
+import cd.go.contrib.elasticagents.marathon.*;
 import cd.go.contrib.elasticagents.marathon.requests.CreateAgentRequest;
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
+
+import static cd.go.contrib.elasticagents.marathon.utils.Util.propertiesMatch;
 
 public class CreateAgentRequestExecutor implements RequestExecutor {
     private final AgentInstances agentInstances;
@@ -34,10 +36,60 @@ public class CreateAgentRequestExecutor implements RequestExecutor {
         this.pluginRequest = pluginRequest;
     }
 
-    @Override
-    public GoPluginApiResponse execute() throws Exception {
-        agentInstances.create(request, pluginRequest.getPluginSettings());
-        return new DefaultGoPluginApiResponse(200);
+    private boolean agentIdle(Agent agent) {
+       return (agent.configState().equals(Agent.ConfigState.Enabled) &&
+               agent.agentState().equals(Agent.AgentState.Idle) &&
+               agent.buildState().equals(Agent.BuildState.Idle)
+       );
     }
 
+    @Override
+    public GoPluginApiResponse execute() throws Exception {
+        /*
+        The logic here is that the go server has a list of agents, but
+        not a definitive view of which of those agents is actually
+        running.  This means that this plugin is sent a createAgentRequest
+        for every matching job being scheduled.
+
+        The housekeeping we do to prevent over-creating new instances is to
+        get a list of agents from the go server, find idle ones in the list,
+        and match to the corresponding instance running on marathon.  If the
+        instance running on marathon would satisfy the request, we do not create
+        a new instance.
+
+        In the case where we might get multiple createAgentRequests in a short
+        period of time, we mark the instance as recently matched so it is not
+        eligible to match for subsequent requests.
+
+        This isn't perfect - we might mark one and then the job actually gets
+        scheduled to another agent.  In the long term, the go agents will use
+        web sockets, the go server will know which ones are still running, and
+        we can drop this logic here.
+         */
+
+        boolean agentMatch = false;
+        for (Agent agent: pluginRequest.listAgents().agents()) {
+            if (!agentIdle(agent)) {
+                continue;
+            }
+            MarathonInstance instance = (MarathonInstance)agentInstances.find(agent.elasticAgentId());
+            if (instance == null) {
+                continue;
+            }
+            if (!propertiesMatch(instance.properties(), request.properties())) {
+                continue;
+            }
+            // Recently matched to an outstanding task
+            if (instance.getLastMatched().isAfter(new DateTime().minus(new Period("PT30S")))) {
+                continue;
+            }
+            agentMatch = true;
+            instance.setLastMatched(new DateTime());
+            break;
+        }
+        if (!agentMatch) {
+            agentInstances.create(request, pluginRequest.getPluginSettings());
+        }
+        return new DefaultGoPluginApiResponse(200);
+    }
 }

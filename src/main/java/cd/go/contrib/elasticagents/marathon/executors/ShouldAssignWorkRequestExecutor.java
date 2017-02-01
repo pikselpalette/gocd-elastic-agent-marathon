@@ -21,7 +21,7 @@ import cd.go.contrib.elasticagents.marathon.MarathonInstance;
 import cd.go.contrib.elasticagents.marathon.PluginRequest;
 import cd.go.contrib.elasticagents.marathon.RequestExecutor;
 import cd.go.contrib.elasticagents.marathon.requests.ShouldAssignWorkRequest;
-import cd.go.contrib.elasticagents.marathon.utils.Size;
+import static cd.go.contrib.elasticagents.marathon.utils.Util.propertiesMatch;
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 
@@ -40,26 +40,6 @@ public class ShouldAssignWorkRequestExecutor implements RequestExecutor {
         this.request = request;
         this.agentInstances = agentInstances;
         this.pluginRequest = pluginRequest;
-    }
-
-    private String castToSize(String mem) {
-        String ret;
-        try {
-            ret = String.valueOf(Size.parse(mem).toMegabytes());
-        } catch (Exception e) {
-            ret = mem;
-        }
-        return ret;
-    }
-
-    private boolean propertiesMatch(Map<String, String> request, Map<String, String> instance) {
-        return (
-                (Double.valueOf(request.getOrDefault("CPUs", "0")).equals(Double.valueOf(instance.getOrDefault("CPUs", "0")))) &&
-                (Double.valueOf(castToSize(request.getOrDefault("Memory", "0"))).equals(Double.valueOf(castToSize(instance.getOrDefault("Memory", "0"))))) &&
-                (request.getOrDefault("Image", "").equals(instance.getOrDefault("Image", ""))) &&
-                (request.getOrDefault("Constraints", "").equals(instance.getOrDefault("Constraints", "")))
-        );
-
     }
 
     @Override

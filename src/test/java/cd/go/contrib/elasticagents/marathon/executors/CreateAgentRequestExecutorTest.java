@@ -16,6 +16,7 @@
 
 package cd.go.contrib.elasticagents.marathon.executors;
 
+import cd.go.contrib.elasticagents.marathon.Agents;
 import cd.go.contrib.elasticagents.marathon.PluginRequest;
 import cd.go.contrib.elasticagents.marathon.PluginSettings;
 import cd.go.contrib.elasticagents.marathon.AgentInstances;
@@ -32,6 +33,7 @@ public class CreateAgentRequestExecutorTest {
         PluginRequest pluginRequest = mock(PluginRequest.class);
         PluginSettings settings = mock(PluginSettings.class);
         when(pluginRequest.getPluginSettings()).thenReturn(settings);
+        when(pluginRequest.listAgents()).thenReturn(new Agents());
         new CreateAgentRequestExecutor(request, agentInstances, pluginRequest).execute();
 
         verify(agentInstances).create(request, settings);

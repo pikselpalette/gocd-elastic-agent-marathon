@@ -37,6 +37,7 @@ public class MarathonInstance {
     private String name;
     private final DateTime createdAt;
     private final String environment;
+    private DateTime lastMatched;
 
     private final String goServerUrl;
     private final String marathonPrefix;
@@ -63,6 +64,7 @@ public class MarathonInstance {
         this.constraints = constraints;
         this.autoRegisterProperties = autoRegisterProperties;
         this.app = buildApp();
+        this.lastMatched = new DateTime();
     }
 
     private MarathonApp buildApp() {
@@ -199,50 +201,6 @@ public class MarathonInstance {
                 '}';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (!(o instanceof MarathonInstance)) return false;
-
-        MarathonInstance that = (MarathonInstance) o;
-
-        return new EqualsBuilder()
-                .append(getName(), that.getName())
-                .append(getCreatedAt(), that.getCreatedAt())
-                .append(getEnvironment(), that.getEnvironment())
-                .append(getGoServerUrl(), that.getGoServerUrl())
-                .append(getMarathonPrefix(), that.getMarathonPrefix())
-                .append(getImage(), that.getImage())
-                .append(getMemory(), that.getMemory())
-                .append(getCpus(), that.getCpus())
-                .append(getCommand(), that.getCommand())
-                .append(getUser(), that.getUser())
-                .append(getConstraints(), that.getConstraints())
-                .append(getAutoRegisterProperties(), that.getAutoRegisterProperties())
-                .append(getApp(), that.getApp())
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(getName())
-                .append(getCreatedAt())
-                .append(getEnvironment())
-                .append(getGoServerUrl())
-                .append(getMarathonPrefix())
-                .append(getImage())
-                .append(getMemory())
-                .append(getCpus())
-                .append(getCommand())
-                .append(getUser())
-                .append(getConstraints())
-                .append(getAutoRegisterProperties())
-                .append(getApp())
-                .toHashCode();
-    }
-
     public Map<String, String> properties() {
         Map<String, String> props = new HashMap<>();
 
@@ -318,5 +276,59 @@ public class MarathonInstance {
 
     public MarathonApp getApp() {
         return app;
+    }
+
+    public DateTime getLastMatched() {
+        return lastMatched;
+    }
+
+    public void setLastMatched(DateTime lastMatched) {
+        this.lastMatched = lastMatched;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof MarathonInstance)) return false;
+
+        MarathonInstance that = (MarathonInstance) o;
+
+        return new EqualsBuilder()
+                .append(getName(), that.getName())
+                .append(getCreatedAt(), that.getCreatedAt())
+                .append(getEnvironment(), that.getEnvironment())
+                .append(getLastMatched(), that.getLastMatched())
+                .append(getGoServerUrl(), that.getGoServerUrl())
+                .append(getMarathonPrefix(), that.getMarathonPrefix())
+                .append(getImage(), that.getImage())
+                .append(getMemory(), that.getMemory())
+                .append(getCpus(), that.getCpus())
+                .append(getCommand(), that.getCommand())
+                .append(getUser(), that.getUser())
+                .append(getConstraints(), that.getConstraints())
+                .append(getAutoRegisterProperties(), that.getAutoRegisterProperties())
+                .append(getApp(), that.getApp())
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(getName())
+                .append(getCreatedAt())
+                .append(getEnvironment())
+                .append(getLastMatched())
+                .append(getGoServerUrl())
+                .append(getMarathonPrefix())
+                .append(getImage())
+                .append(getMemory())
+                .append(getCpus())
+                .append(getCommand())
+                .append(getUser())
+                .append(getConstraints())
+                .append(getAutoRegisterProperties())
+                .append(getApp())
+                .toHashCode();
     }
 }

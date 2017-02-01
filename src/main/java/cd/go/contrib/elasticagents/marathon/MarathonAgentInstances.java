@@ -56,6 +56,7 @@ public class MarathonAgentInstances implements AgentInstances<MarathonInstance> 
 
     @Override
     public MarathonInstance create(CreateAgentRequest request, PluginSettings settings) throws Exception {
+
         final Integer maxInstances = settings.getMaxInstances();
         synchronized (instances) {
             doWithLockOnSemaphore(new SetupSemaphore(maxInstances, instances, semaphore));

@@ -31,6 +31,24 @@ import java.util.Properties;
 
 public class Util {
 
+    public static boolean propertiesMatch(Map<String, String> request, Map<String, String> instance) {
+        return (
+                (Double.valueOf(request.getOrDefault("CPUs", "0")).equals(Double.valueOf(instance.getOrDefault("CPUs", "0")))) &&
+                        (Double.valueOf(castToSize(request.getOrDefault("Memory", "0"))).equals(Double.valueOf(castToSize(instance.getOrDefault("Memory", "0"))))) &&
+                        (request.getOrDefault("Image", "").equals(instance.getOrDefault("Image", ""))) &&
+                        (request.getOrDefault("Constraints", "").equals(instance.getOrDefault("Constraints", "")))
+        );
+
+    }
+
+    private static String castToSize(String mem) {
+        try {
+            return String.valueOf(Size.parse(mem).toMegabytes());
+        } catch (Exception e) {
+            return mem;
+        }
+    }
+
     public static String stringFromMap(Map<String, String> input) {
         String ret = "";
         boolean first = true;
