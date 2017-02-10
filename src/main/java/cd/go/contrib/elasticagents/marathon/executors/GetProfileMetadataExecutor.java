@@ -35,6 +35,8 @@ public class GetProfileMetadataExecutor implements RequestExecutor {
     private static final Metadata ENVIRONMENT = new Metadata("Environment", false, false);
     private static final Metadata USER = new Metadata("User", false, false);
     private static final Metadata CONSTRAINTS = new ArrayMetadata("Constraints", false);
+    private static final Metadata URIS = new Metadata("URIs", false, false);
+    private static final Metadata VOLUMES = new Metadata("Volumes", false, false);
 
     static final List<Metadata> FIELDS = new ArrayList<>();
 
@@ -46,6 +48,8 @@ public class GetProfileMetadataExecutor implements RequestExecutor {
         FIELDS.add(ENVIRONMENT);
         FIELDS.add(USER);
         FIELDS.add(CONSTRAINTS);
+        FIELDS.add(URIS);
+        FIELDS.add(VOLUMES);
     }
 
     @Override

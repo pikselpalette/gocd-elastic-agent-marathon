@@ -56,4 +56,22 @@
       <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[Constraints].$error.server}" ng-show="GOINPUTNAME[Constraints].$error.server">{{GOINPUTNAME[Constraints].$error.server}}</span>
     </div>
   </div>
+  <div class="row">
+    <div class="columns end">
+      <label ng-class="{'is-invalid-label': GOINPUTNAME[URIs].$error.server}">URIs
+        <small>(Enter one constraint per line)</small>
+      </label>
+      <textarea ng-class="{'is-invalid-input': GOINPUTNAME[URIs].$error.server}" type="text" ng-model="URIs" ng-required="true" rows="7" placeholder="file:///tmp/test.txt&#x000A;s3a://test-bucket/test2.txt"></textarea>
+      <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[URIs].$error.server}" ng-show="GOINPUTNAME[URIs].$error.server">{{GOINPUTNAME[URIs].$error.server}}</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="columns end">
+      <label ng-class="{'is-invalid-label': GOINPUTNAME[Volumes].$error.server}">Volumes
+        <small>(Enter one constraint per line)</small>
+      </label>
+      <textarea ng-class="{'is-invalid-input': GOINPUTNAME[Volumes].$error.server}" type="text" ng-model="Volumes" ng-required="true" rows="7" placeholder="/var/run/docker.sock:/var/run/docker.sock&#x000A;/etc/foo:/etc/foo:RO"></textarea>
+      <span class="form_error form-error" ng-class="{'is-visible': GOINPUTNAME[Volumes].$error.server}" ng-show="GOINPUTNAME[Volumes].$error.server">{{GOINPUTNAME[Volumes].$error.server}}</span>
+    </div>
+  </div>
 </div>

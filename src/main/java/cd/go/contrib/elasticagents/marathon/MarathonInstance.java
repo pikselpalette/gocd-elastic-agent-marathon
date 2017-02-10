@@ -24,6 +24,7 @@ import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import mesosphere.marathon.client.model.v2.App;
 import mesosphere.marathon.client.model.v2.Container;
+import mesosphere.marathon.client.model.v2.Volume;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
@@ -47,10 +48,12 @@ public class MarathonInstance {
     private final String command;
     private final String user;
     private final String constraints;
+    private final String uris;
+    private final String volumes;
     private final Map<String,String> autoRegisterProperties;
     private final MarathonApp app;
 
-    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, String constraints, Map<String, String> autoRegisterProperties) {
+    MarathonInstance(String name, DateTime createdAt, String environment, String goServerUrl, String marathonPrefix, String image, Double memory, Double cpus, String command, String user, String constraints, String uris, String volumes, Map<String, String> autoRegisterProperties) {
         this.name = name;
         this.createdAt = createdAt;
         this.environment = environment;
@@ -62,6 +65,8 @@ public class MarathonInstance {
         this.command = command;
         this.user = user;
         this.constraints = constraints;
+        this.uris = uris;
+        this.volumes = volumes;
         this.autoRegisterProperties = autoRegisterProperties;
         this.app = buildApp();
         this.lastMatched = new DateTime();
@@ -72,12 +77,29 @@ public class MarathonInstance {
         docker.setImage(getImage());
         docker.setNetwork("HOST");
         docker.setPrivileged(true);
-        docker.setForcePullImage(false);
+        docker.setForcePullImage(true);
         docker.setPortMappings(new ArrayList<>());
 
         Container container = new Container();
         container.setType("DOCKER");
         container.setDocker(docker);
+
+        if (isNotBlank(getVolumes())) {
+            List<Volume> containerVolumes = new ArrayList<>();
+            for (String volume: getVolumes().split("\n")) {
+                List<String> vol = Arrays.asList(volume.split(":"));
+                Volume containerVolume = new Volume();
+                containerVolume.setContainerPath(vol.get(0));
+                containerVolume.setHostPath(vol.get(1));
+                if (vol.size() > 2) {
+                    containerVolume.setMode(vol.get(2));
+                } else {
+                    containerVolume.setMode("RW");
+                }
+                containerVolumes.add(containerVolume);
+            }
+            container.setVolumes(containerVolumes);
+        }
 
         MarathonApp app = new MarathonApp();
         app.setMem(getMemory());
@@ -89,6 +111,12 @@ public class MarathonInstance {
 
         if (isNotBlank(getCommand())) {
             app.setCmd(getCommand());
+        }
+
+        if (isNotBlank(getUris())) {
+            List<String> uris = new ArrayList<>();
+            uris.addAll(Arrays.asList(getUris().split("\n")));
+            app.setUris(uris);
         }
 
         if (isNotBlank(getConstraints())) {
@@ -140,6 +168,16 @@ public class MarathonInstance {
         }
         String constraints = String.join("\n", constraintList);
 
+        String uris = app.getUris() == null ? "" : String.join("\n", app.getUris());
+
+        List<String> volumes = new ArrayList<>();
+        if (app.getContainer().getVolumes() != null) {
+            for (Volume volume: app.getContainer().getVolumes()) {
+                volumes.add(volume.getContainerPath() + ":" + volume.getHostPath() + ":" + volume.getMode());
+            }
+        }
+        String vols = String.join("\n", volumes);
+
         return new MarathonInstance(
                 app.getId().substring(settings.getMarathonPrefix().length()),
                 createdTime,
@@ -152,6 +190,8 @@ public class MarathonInstance {
                 app.getCmd(),
                 app.getEnv().get("GO_EA_USER"),
                 constraints,
+                uris,
+                vols,
                 autoRegisterProperties
         );
     }
@@ -175,6 +215,8 @@ public class MarathonInstance {
                 request.properties().get("Command"),
                 request.properties().get("User"),
                 request.properties().get("Constraints"),
+                request.properties().get("URIs"),
+                request.properties().get("Volumes"),
                 request.autoregisterPropertiesAsEnvironmentVars(name)
         );
 
@@ -196,6 +238,8 @@ public class MarathonInstance {
                 ", command='" + command + '\'' +
                 ", user='" + user + '\'' +
                 ", constraints='" + constraints + '\'' +
+                ", uris='" + uris + '\'' +
+                ", volumes='" + volumes + '\'' +
                 ", autoRegisterProperties=" + autoRegisterProperties +
                 ", app=" + app +
                 '}';
@@ -270,6 +314,14 @@ public class MarathonInstance {
         return constraints;
     }
 
+    public String getUris() {
+        return uris;
+    }
+
+    public String getVolumes() {
+        return volumes;
+    }
+
     public Map<String, String> getAutoRegisterProperties() {
         return autoRegisterProperties;
     }
@@ -307,6 +359,8 @@ public class MarathonInstance {
                 .append(getCommand(), that.getCommand())
                 .append(getUser(), that.getUser())
                 .append(getConstraints(), that.getConstraints())
+                .append(getUris(), that.getUris())
+                .append(getVolumes(), that.getVolumes())
                 .append(getAutoRegisterProperties(), that.getAutoRegisterProperties())
                 .append(getApp(), that.getApp())
                 .isEquals();
@@ -327,6 +381,8 @@ public class MarathonInstance {
                 .append(getCommand())
                 .append(getUser())
                 .append(getConstraints())
+                .append(getUris())
+                .append(getVolumes())
                 .append(getAutoRegisterProperties())
                 .append(getApp())
                 .toHashCode();

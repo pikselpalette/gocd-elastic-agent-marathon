@@ -83,9 +83,23 @@ public class GetProfileMetadataExecutorTest {
                 "      \"required\": false,\n" +
                 "      \"secure\": false\n" +
                 "    }\n" +
-               "  },\n" +
+                "  },\n" +
                 "  {\n" +
                 "    \"key\": \"Constraints\",\n" +
+                "    \"metadata\": {\n" +
+                "      \"required\": false,\n" +
+                "      \"secure\": false\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"key\": \"URIs\",\n" +
+                "    \"metadata\": {\n" +
+                "      \"required\": false,\n" +
+                "      \"secure\": false\n" +
+                "    }\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"key\": \"Volumes\",\n" +
                 "    \"metadata\": {\n" +
                 "      \"required\": false,\n" +
                 "      \"secure\": false\n" +
