@@ -18,6 +18,7 @@ package cd.go.contrib.elasticagents.marathon;
 
 import cd.go.contrib.elasticagents.marathon.marathon.MarathonApp;
 import cd.go.contrib.elasticagents.marathon.marathon.MarathonDocker;
+import cd.go.contrib.elasticagents.marathon.marathon.UpgradeStrategy;
 import cd.go.contrib.elasticagents.marathon.requests.CreateAgentRequest;
 import cd.go.contrib.elasticagents.marathon.utils.Size;
 import com.google.common.collect.Iterables;
@@ -84,6 +85,7 @@ public class MarathonInstance {
         container.setType("DOCKER");
         container.setDocker(docker);
 
+
         if (isNotBlank(getVolumes())) {
             List<Volume> containerVolumes = new ArrayList<>();
             for (String volume: getVolumes().split("\n")) {
@@ -108,6 +110,11 @@ public class MarathonInstance {
         app.setInstances(1);
         app.setContainer(container);
         app.setPorts(new ArrayList<>());
+
+        UpgradeStrategy upgradeStrategy = new UpgradeStrategy();
+        upgradeStrategy.setMaximumOverCapacity(0.0);
+        upgradeStrategy.setMinimumHealthCapacity(0.0);
+        app.setUpgradeStrategy(upgradeStrategy);
 
         if (isNotBlank(getCommand())) {
             app.setCmd(getCommand());
